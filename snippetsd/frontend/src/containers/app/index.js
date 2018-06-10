@@ -29,6 +29,8 @@ const App = () => (
       <Nav>
         <NavItem componentClass={Link} eventKey={1}
           href='/submit' to='/submit'>write</NavItem>
+        <NavItem componentClass={Link} eventKey={2}
+          href='/submit' to='/submit'>my past snippets</NavItem>
       </Nav>
     </Navbar>
 
