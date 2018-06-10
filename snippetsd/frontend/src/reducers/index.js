@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import React from 'react'
+import { combineReducers } from 'redux'
+import { routerReducer } from 'react-router-redux'
+import snippets from './snippets'
 
-const About = () => (
-  <div>
-    <h1>About Page</h1>
-    <p>Did you get here via Redux?</p>
-  </div>
-)
-
-export default About
+export default combineReducers({
+  router: routerReducer,
+  snippets
+})

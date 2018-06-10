@@ -14,19 +14,27 @@
 
 import React from 'react'
 import { Route, Link } from 'react-router-dom'
-import Home from '../home'
-import About from '../about'
+import { Nav, NavItem, Navbar } from 'react-bootstrap'
+import MainPage from '../MainPage'
+import SubmitSnippetPage from '../SubmitSnippetPage'
 
 const App = () => (
   <div>
-    <header>
-      <Link to='/'>Home</Link>
-      <Link to='/about-us'>About</Link>
-    </header>
+    <Navbar>
+      <Navbar.Header>
+        <Navbar.Brand>
+          <Link to='/'>Snippets</Link>
+        </Navbar.Brand>
+      </Navbar.Header>
+      <Nav>
+        <NavItem componentClass={Link} eventKey={1}
+          href='/submit' to='/submit'>write</NavItem>
+      </Nav>
+    </Navbar>
 
     <main>
-      <Route exact path='/' component={Home} />
-      <Route exact path='/about-us' component={About} />
+      <Route exact path='/' component={MainPage} />
+      <Route exact path='/submit' component={SubmitSnippetPage} />
     </main>
   </div>
 )
