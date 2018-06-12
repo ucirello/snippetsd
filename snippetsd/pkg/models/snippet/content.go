@@ -18,5 +18,5 @@ package snippet
 type Content struct {
 	ID        int64  `db:"id" json:"id"`
 	SnippetID string `db:"snippet_id" json:"snippet_id"`
-	Text      string `db:"text" json:"text"`
+	Content   string `db:"content" json:"content"`
 }

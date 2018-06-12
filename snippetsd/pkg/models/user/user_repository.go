@@ -54,7 +54,7 @@ func (b *Repository) Bootstrap() error {
 // GetByID loads a user by ID.
 func (b *Repository) GetByID(id int64) (*User, error) {
 	var u User
-	err := b.db.Select(&u, "SELECT * FROM users WHERE id = $1", id)
+	err := b.db.Get(&u, "SELECT * FROM users WHERE id = $1", id)
 	return &u, errors.E(err)
 }
 

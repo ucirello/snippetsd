@@ -63,17 +63,18 @@ func (b *Repository) Bootstrap() error {
 }
 
 // RepositoryOption allows to modify the repository calls as needed.
-type RepositoryOption func(*Repository, []*Snippet) error
+type RepositoryOption func(*Repository, *[]*Snippet) error
 
 // WithContent will plug the snippet content.
 func WithContent() RepositoryOption {
-	return func(b *Repository, snippets []*Snippet) error {
-		for _, s := range snippets {
+	return func(b *Repository, snippets *[]*Snippet) error {
+		for i, s := range *snippets {
 			contents, err := b.contentsRepository.GetBySnippetID(s.ID)
 			if err != nil {
 				return errors.E(err, "cannot load snippets content")
 			}
 			s.Contents = contents
+			(*snippets)[i] = s
 		}
 		return nil
 	}
@@ -81,23 +82,24 @@ func WithContent() RepositoryOption {
 
 // WithUser will plug the snippet user.
 func WithUser() RepositoryOption {
-	return func(b *Repository, snippets []*Snippet) error {
+	return func(b *Repository, snippets *[]*Snippet) error {
 		repo := user.NewRepository(b.db)
-		for _, s := range snippets {
+		for i, s := range *snippets {
 			u, err := repo.GetByID(s.ID)
 			if err != nil {
 				return errors.E(err, "cannot load snippets user")
 			}
 			s.User = u
+			(*snippets)[i] = s
 		}
 		return nil
 	}
 }
 
-func applyRepositoryOptions(b *Repository, snippets []*Snippet, opts []RepositoryOption) error {
+func applyRepositoryOptions(b *Repository, snippets *[]*Snippet, opts []RepositoryOption) error {
 	for _, opt := range opts {
 		if err := opt(b, snippets); err != nil {
-			return errors.E(err, "failed to  apply repository option")
+			return errors.E(err, "failed to apply repository option")
 		}
 	}
 	return nil
@@ -107,7 +109,9 @@ func applyRepositoryOptions(b *Repository, snippets []*Snippet, opts []Repositor
 func (b *Repository) All(opts ...RepositoryOption) ([]*Snippet, error) {
 	var snippets []*Snippet
 	err := b.db.Select(&snippets, "SELECT * FROM snippets")
-	applyRepositoryOptions(b, snippets, opts)
+	if err := applyRepositoryOptions(b, &snippets, opts); err != nil {
+		return snippets, errors.E(err)
+	}
 	return snippets, errors.E(err)
 }
 
@@ -116,7 +120,9 @@ func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 	var snippets []*Snippet
 	// TODO: convert 7 to variable representing the number of days
 	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE created_at > 7")
-	applyRepositoryOptions(b, snippets, opts)
+	if err := applyRepositoryOptions(b, &snippets, opts); err != nil {
+		return snippets, errors.E(err)
+	}
 	return snippets, errors.E(err)
 }
 
