@@ -23,11 +23,9 @@ import (
 
 // Snippet stores the basic information of a snippet.
 type Snippet struct {
-	ID           int64      `db:"id" json:"id"`
-	UserID       string     `db:"user_id" json:"user_id"`
-	When         *time.Time `db:"when" json:"when"`
-	SnippetIndex int64      `db:"snippet_index" json:"snippet_index"`
-	Content      string     `db:"content" json:"content"`
+	ID     int64      `db:"id" json:"id"`
+	UserID string     `db:"user_id" json:"user_id"`
+	When   *time.Time `db:"when" json:"when"`
 }
 
 // SnippetDAO provides DB persistence to Snippets.
@@ -46,9 +44,7 @@ func (b *SnippetDAO) Bootstrap() error {
 		`create table if not exists snippets (
 			id integer primary key autoincrement,
 			user_id bigint,
-			when datetime,
-			snippet_index int,
-			content text
+			when datetime
 		);
 		`,
 		`create index if not exists snippets_user_id  on snippets (user_id)`,
@@ -84,8 +80,8 @@ func (b *SnippetDAO) Current() ([]*Snippet, error) {
 func (b *SnippetDAO) Insert(snippet *Snippet) (*Snippet, error) {
 	_, err := b.db.NamedExec(`
 		INSERT INTO snippets
-		(user_id, when, snippet_index, content)
-		VALUES (:user_id, :when, :snippet_index, :content)
+		(user_id, when)
+		VALUES (:user_id, :when)
 	`, snippet)
 	if err != nil {
 		return nil, errors.E(err)
@@ -111,9 +107,7 @@ func (b *SnippetDAO) Update(snippet *Snippet) error {
 		UPDATE snippets
 		SET
 			user_id = :user_id,
-			when = :when,
-			snippet_index = :snippet_index,
-			content = :content
+			when = :when
 		WHERE
 			id = :id
 	`, snippet)
