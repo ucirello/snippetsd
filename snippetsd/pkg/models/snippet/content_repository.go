@@ -12,32 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package models // import "cirello.io/snippetsd/pkg/models"
+package snippet
 
 import (
 	"cirello.io/snippetsd/pkg/errors"
 	"github.com/jmoiron/sqlx"
 )
 
-// Content stores the texts of a snippet
-type Content struct {
-	ID        int64  `db:"id" json:"id"`
-	SnippetID string `db:"snippet_id" json:"snippet_id"`
-	Text      string `db:"text" json:"text"`
-}
-
-// ContentsDAO provides DB persistence to snippets contents.
-type ContentsDAO struct {
+// contentsRepository provides a repository of snippets contents.
+type contentsRepository struct {
 	db *sqlx.DB
 }
 
-// NewContentsDAO instanties a ContentsDAO
-func NewContentsDAO(db *sqlx.DB) *ContentsDAO {
-	return &ContentsDAO{db: db}
+// newContentsRepository instanties a contentsRepository
+func newContentsRepository(db *sqlx.DB) *contentsRepository {
+	return &contentsRepository{db: db}
 }
 
 // Bootstrap creates table if missing.
-func (b *ContentsDAO) Bootstrap() error {
+func (b *contentsRepository) Bootstrap() error {
 	cmds := []string{
 		`create table if not exists contents (
 			id integer primary key autoincrement,
@@ -59,14 +52,14 @@ func (b *ContentsDAO) Bootstrap() error {
 }
 
 // GetBySnippetID loads a snippet's content.
-func (b *ContentsDAO) GetBySnippetID(id int64) ([]*Content, error) {
+func (b *contentsRepository) GetBySnippetID(id int64) ([]*Content, error) {
 	var contents []*Content
 	err := b.db.Select(&contents, "SELECT * FROM contents")
 	return contents, errors.E(err)
 }
 
 // Insert one snippet entry content.
-func (b *ContentsDAO) Insert(content *Content) (*Content, error) {
+func (b *contentsRepository) Insert(content *Content) (*Content, error) {
 	_, err := b.db.NamedExec(`
 		INSERT INTO contents
 		(snippet_id, content)
@@ -91,7 +84,7 @@ func (b *ContentsDAO) Insert(content *Content) (*Content, error) {
 }
 
 // Update one content.
-func (b *ContentsDAO) Update(content *Content) error {
+func (b *contentsRepository) Update(content *Content) error {
 	_, err := b.db.NamedExec(`
 		UPDATE contents
 		SET

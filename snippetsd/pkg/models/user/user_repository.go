@@ -12,18 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package models // import "cirello.io/snippetsd/pkg/models"
+package user // import "cirello.io/snippetsd/pkg/models/user"
 
 import (
 	"cirello.io/snippetsd/pkg/errors"
 	"github.com/jmoiron/sqlx"
 )
-
-// User stores th user of snippets
-type User struct {
-	ID    int64  `db:"id" json:"id"`
-	Email string `db:"email" json:"email"`
-}
 
 // UsersDAO provides DB persistence to snippets ssers.
 type UsersDAO struct {
