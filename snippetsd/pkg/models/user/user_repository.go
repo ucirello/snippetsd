@@ -34,7 +34,8 @@ func (b *Repository) Bootstrap() error {
 	cmds := []string{
 		`create table if not exists users (
 			id integer primary key autoincrement,
-			email varchar(255)
+			email varchar(255),
+			constraint users_email_unique unique (email)
 		);
 		`,
 		`create index if not exists users_email on users (email)`,
@@ -50,11 +51,18 @@ func (b *Repository) Bootstrap() error {
 	return nil
 }
 
+// GetByID loads a user by ID.
+func (b *Repository) GetByID(id int64) (*User, error) {
+	var u User
+	err := b.db.Select(&u, "SELECT * FROM users WHERE id = $1", id)
+	return &u, errors.E(err)
+}
+
 // GetByEmail loads a user by email.
-func (b *Repository) GetByEmail(email string) ([]*User, error) {
-	var Users []*User
-	err := b.db.Select(&Users, "SELECT * FROM users WHERE email = $1", email)
-	return Users, errors.E(err)
+func (b *Repository) GetByEmail(email string) (*User, error) {
+	var u User
+	err := b.db.Get(&u, "SELECT * FROM users WHERE email = $1", email)
+	return &u, errors.E(err)
 }
 
 // Insert a user.

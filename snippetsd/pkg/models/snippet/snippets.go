@@ -17,6 +17,7 @@ package snippet // import "cirello.io/snippetsd/pkg/models/snippet"
 import (
 	"time"
 
+	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -27,6 +28,7 @@ type Snippet struct {
 	CreatedAt *time.Time `db:"created_at" json:"created_at"`
 
 	Contents []*Content `db:"-" json:"content"`
+	User     *user.User `db:"-" json:"user"`
 }
 
 // AddContent add one or more contents to a snippet.
@@ -56,5 +58,5 @@ func (s *Snippet) HasContent() bool {
 // LoadAll load all snippets for the current week
 func LoadAll(db *sqlx.DB) ([]*Snippet, error) {
 	repo := NewRepository(db)
-	return repo.All(WithContent())
+	return repo.All(WithContent(), WithUser())
 }

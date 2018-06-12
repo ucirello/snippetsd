@@ -16,6 +16,7 @@ package snippet
 
 import (
 	"cirello.io/snippetsd/pkg/errors"
+	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -64,7 +65,7 @@ func (b *Repository) Bootstrap() error {
 // RepositoryOption allows to modify the repository calls as needed.
 type RepositoryOption func(*Repository, []*Snippet) error
 
-// WithContent will plugin the snippet content.
+// WithContent will plug the snippet content.
 func WithContent() RepositoryOption {
 	return func(b *Repository, snippets []*Snippet) error {
 		for _, s := range snippets {
@@ -73,6 +74,21 @@ func WithContent() RepositoryOption {
 				return errors.E(err, "cannot load snippets content")
 			}
 			s.Contents = contents
+		}
+		return nil
+	}
+}
+
+// WithUser will plug the snippet user.
+func WithUser() RepositoryOption {
+	return func(b *Repository, snippets []*Snippet) error {
+		repo := user.NewRepository(b.db)
+		for _, s := range snippets {
+			u, err := repo.GetByID(s.ID)
+			if err != nil {
+				return errors.E(err, "cannot load snippets user")
+			}
+			s.User = u
 		}
 		return nil
 	}
