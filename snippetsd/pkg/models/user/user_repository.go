@@ -19,18 +19,18 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// UsersDAO provides DB persistence to snippets ssers.
-type UsersDAO struct {
+// Repository provides DB persistence to snippets users.
+type Repository struct {
 	db *sqlx.DB
 }
 
-// NewUsersDAO instanties a UsersDAO
-func NewUsersDAO(db *sqlx.DB) *UsersDAO {
-	return &UsersDAO{db: db}
+// NewRepository instanties a Repository
+func NewRepository(db *sqlx.DB) *Repository {
+	return &Repository{db: db}
 }
 
 // Bootstrap creates table if missing.
-func (b *UsersDAO) Bootstrap() error {
+func (b *Repository) Bootstrap() error {
 	cmds := []string{
 		`create table if not exists users (
 			id integer primary key autoincrement,
@@ -51,14 +51,14 @@ func (b *UsersDAO) Bootstrap() error {
 }
 
 // GetByEmail loads a user by email.
-func (b *UsersDAO) GetByEmail(email string) ([]*User, error) {
+func (b *Repository) GetByEmail(email string) ([]*User, error) {
 	var Users []*User
 	err := b.db.Select(&Users, "SELECT * FROM users WHERE email = $1", email)
 	return Users, errors.E(err)
 }
 
 // Insert a user.
-func (b *UsersDAO) Insert(user *User) (*User, error) {
+func (b *Repository) Insert(user *User) (*User, error) {
 	_, err := b.db.NamedExec(`
 		INSERT INTO users
 		(email)
@@ -83,7 +83,7 @@ func (b *UsersDAO) Insert(user *User) (*User, error) {
 }
 
 // Update a user.
-func (b *UsersDAO) Update(user *User) error {
+func (b *Repository) Update(user *User) error {
 	_, err := b.db.NamedExec(`
 		UPDATE Users
 		SET

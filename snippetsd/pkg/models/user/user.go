@@ -13,9 +13,31 @@
 // limitations under the License.
 
 package user // import "cirello.io/snippetsd/pkg/models/user"
+import (
+	"fmt"
+
+	"github.com/jmoiron/sqlx"
+)
 
 // User aggregates all the information of a snippet user.
 type User struct {
 	ID    int64  `db:"id" json:"id"`
 	Email string `db:"email" json:"email"`
+}
+
+func (u *User) String() string {
+	return fmt.Sprintf("%v", u.Email)
+}
+
+// Add inserts a user into the repository.
+func Add(db *sqlx.DB, u *User) (*User, error) {
+	return NewRepository(db).Insert(u)
+}
+
+// NewFromEmail creates a user from a given email.
+func NewFromEmail(email string) (*User, error) {
+	// TODO: validate email
+	return &User{
+		Email: email,
+	}, nil
 }

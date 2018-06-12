@@ -40,17 +40,17 @@ func (b *Repository) Bootstrap() error {
 		`create table if not exists snippets (
 			id integer primary key autoincrement,
 			user_id bigint,
-			when datetime
+			created_at datetime
 		);
 		`,
-		`create index if not exists snippets_user_id  on snippets (user_id)`,
-		`create index if not exists snippets_when on snippets (when)`,
+		`create index if not exists snippets_user_id on snippets (user_id)`,
+		`create index if not exists snippets_created_at on snippets (created_at)`,
 	}
 
 	for _, cmd := range cmds {
 		_, err := b.db.Exec(cmd)
 		if err != nil {
-			return errors.E(err)
+			return errors.E(err, cmd)
 		}
 	}
 
@@ -99,7 +99,7 @@ func (b *Repository) All(opts ...RepositoryOption) ([]*Snippet, error) {
 func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 	var snippets []*Snippet
 	// TODO: convert 7 to variable representing the number of days
-	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE when > 7")
+	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE created_at > 7")
 	applyRepositoryOptions(b, snippets, opts)
 	return snippets, errors.E(err)
 }
@@ -108,8 +108,8 @@ func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 func (b *Repository) Insert(snippet *Snippet) (*Snippet, error) {
 	_, err := b.db.NamedExec(`
 		INSERT INTO snippets
-		(user_id, when)
-		VALUES (:user_id, :when)
+		(user_id, created_at)
+		VALUES (:user_id, :created_at)
 	`, snippet)
 	if err != nil {
 		return nil, errors.E(err)
@@ -142,7 +142,7 @@ func (b *Repository) Update(snippet *Snippet) error {
 		UPDATE snippets
 		SET
 			user_id = :user_id,
-			when = :when
+			created_at = :created_at
 		WHERE
 			id = :id
 	`, snippet)

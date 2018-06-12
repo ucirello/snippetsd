@@ -22,9 +22,9 @@ import (
 
 // Snippet aggregates all the information of a snippet.
 type Snippet struct {
-	ID     int64      `db:"id" json:"id"`
-	UserID string     `db:"user_id" json:"user_id"`
-	When   *time.Time `db:"when" json:"when"`
+	ID        int64      `db:"id" json:"id"`
+	UserID    string     `db:"user_id" json:"user_id"`
+	CreatedAt *time.Time `db:"created_at" json:"created_at"`
 
 	Contents []*Content `db:"-" json:"content"`
 }
