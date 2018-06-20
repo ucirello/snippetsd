@@ -39,7 +39,8 @@ func (s *Server) unauthorized(w http.ResponseWriter) {
 // ServeHTTP process HTTP requests.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	// TODO: handle Access-Control-Allow-Origin correctly
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5200")
+	w.Header().Set("Access-Control-Allow-Credentials", "true")
 
 	email, password, ok := r.BasicAuth()
 	if !ok {
@@ -58,7 +59,6 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) state(w http.ResponseWriter, r *http.Request) {
-
 	snippets, err := snippet.LoadAll(s.db)
 	if err != nil {
 		log.Println("cannot load all snippets:", err)
