@@ -25,15 +25,12 @@ import (
 // Repository provides a repository of Snippets.
 type Repository struct {
 	db *sqlx.DB
-
-	contentsRepository *contentsRepository
 }
 
 // NewRepository instanties a Repository
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		db:                 db,
-		contentsRepository: newContentsRepository(db),
+		db: db,
 	}
 }
 
@@ -43,11 +40,12 @@ func (b *Repository) Bootstrap() error {
 		`create table if not exists snippets (
 			id integer primary key autoincrement,
 			user_id bigint,
-			created_at datetime
+			week_start datetime,
+			contents bigtext
 		);
 		`,
 		`create index if not exists snippets_user_id on snippets (user_id)`,
-		`create index if not exists snippets_created_at on snippets (created_at)`,
+		`create index if not exists snippets_week_start on snippets (week_start)`,
 	}
 
 	for _, cmd := range cmds {
@@ -57,30 +55,11 @@ func (b *Repository) Bootstrap() error {
 		}
 	}
 
-	if err := b.contentsRepository.Bootstrap(); err != nil {
-		return errors.E(err, "cannot create table for contents")
-	}
-
 	return nil
 }
 
 // RepositoryOption allows to modify the repository calls as needed.
 type RepositoryOption func(*Repository, *[]*Snippet) error
-
-// WithContent will plug the snippet content.
-func WithContent() RepositoryOption {
-	return func(b *Repository, snippets *[]*Snippet) error {
-		for i, s := range *snippets {
-			contents, err := b.contentsRepository.GetBySnippetID(s.ID)
-			if err != nil {
-				return errors.E(err, "cannot load snippets content")
-			}
-			s.Contents = contents
-			(*snippets)[i] = s
-		}
-		return nil
-	}
-}
 
 // WithUser will plug the snippet user.
 func WithUser() RepositoryOption {
@@ -120,7 +99,10 @@ func (b *Repository) All(opts ...RepositoryOption) ([]*Snippet, error) {
 // Current returns the current week snippets.
 func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 	var snippets []*Snippet
-	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE created_at >= $1", 7*24*time.Hour)
+
+	weekStart := 7 * 24 * time.Hour // TODO: calculate correct week start
+	err := b.db.Select(&snippets,
+		"SELECT * FROM snippets WHERE week_start >= $1", weekStart)
 	if err := applyRepositoryOptions(b, &snippets, opts); err != nil {
 		return snippets, errors.E(err)
 	}
@@ -131,8 +113,8 @@ func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 func (b *Repository) Insert(snippet *Snippet) (*Snippet, error) {
 	_, err := b.db.NamedExec(`
 		INSERT INTO snippets
-		(user_id, created_at)
-		VALUES (:user_id, :created_at)
+		(user_id, week_start, contents)
+		VALUES (:user_id, :week_start, :contents)
 	`, snippet)
 	if err != nil {
 		return nil, errors.E(err)
@@ -150,12 +132,6 @@ func (b *Repository) Insert(snippet *Snippet) (*Snippet, error) {
 		return nil, errors.E(err)
 	}
 
-	for _, c := range snippet.Contents {
-		c, err = b.contentsRepository.Insert(c)
-		if err != nil {
-			return snippet, errors.E(err, "cannot insert snippet content")
-		}
-	}
 	return snippet, nil
 }
 
@@ -165,17 +141,14 @@ func (b *Repository) Update(snippet *Snippet) error {
 		UPDATE snippets
 		SET
 			user_id = :user_id,
-			created_at = :created_at
+			week_start = :week_start,
+			contents = :contents
 		WHERE
 			id = :id
 	`, snippet)
 	if err != nil {
 		return errors.E(err)
 	}
-	for _, c := range snippet.Contents {
-		if err := b.contentsRepository.Update(c); err != nil {
-			return errors.E(err, "cannot update snippet content")
-		}
-	}
+
 	return nil
 }

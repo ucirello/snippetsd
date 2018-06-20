@@ -36,6 +36,7 @@ func (b *Repository) Bootstrap() error {
 			id integer primary key autoincrement,
 			email varchar(255),
 			password varchar(255),
+			team varchar(255),
 			constraint users_email_unique unique (email)
 		);
 		`,
@@ -73,8 +74,8 @@ func (b *Repository) Insert(user *User) (*User, error) {
 	}
 	_, err := b.db.NamedExec(`
 		INSERT INTO users
-		(email, password)
-		VALUES (:email, :password)
+		(email, password, team)
+		VALUES (:email, :password, :team)
 	`, user)
 	if err != nil {
 		return nil, errors.E(err)

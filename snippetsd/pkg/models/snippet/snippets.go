@@ -25,38 +25,19 @@ import (
 type Snippet struct {
 	ID        int64      `db:"id" json:"id"`
 	UserID    string     `db:"user_id" json:"user_id"`
-	CreatedAt *time.Time `db:"created_at" json:"created_at"`
+	WeekStart *time.Time `db:"week_start" json:"week_start"`
 
-	Contents []*Content `db:"-" json:"content"`
+	Contents string     `db:"contents" json:"contents"`
 	User     *user.User `db:"-" json:"user"`
 }
 
-// AddContent add one or more contents to a snippet.
-func (s *Snippet) AddContent(contents ...*Content) {
-	s.Contents = append(s.Contents, contents...)
-}
-
-// DeleteContent remove one content of a snippet. Returns if the content was
-// found and removed.
-func (s *Snippet) DeleteContent(content *Content) bool {
-	var contents []*Content
-	var found bool
-	for _, c := range s.Contents {
-		if c.ID != content.ID {
-			contents = append(contents, c)
-			found = true
-		}
-	}
-	return found
-}
-
-// HasContent checks if the snippet has any content
+// HasContent checks if the snippet has any content.
 func (s *Snippet) HasContent() bool {
 	return len(s.Contents) > 0
 }
 
-// LoadAll load all snippets for the current week
+// LoadAll load all snippets for the current week.
 func LoadAll(db *sqlx.DB) ([]*Snippet, error) {
 	repo := NewRepository(db)
-	return repo.All(WithContent(), WithUser())
+	return repo.All(WithUser())
 }

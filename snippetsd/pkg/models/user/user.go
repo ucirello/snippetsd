@@ -27,6 +27,7 @@ type User struct {
 	ID       int64  `db:"id" json:"id"`
 	Email    string `db:"email" json:"email"`
 	Password string `db:"password" json:"-"`
+	Team     string `db:"team" json:"team"`
 }
 
 func (u *User) String() string {
@@ -55,11 +56,12 @@ func Add(db *sqlx.DB, u *User) (*User, error) {
 }
 
 // NewFromEmail creates a user from a given email.
-func NewFromEmail(email, password string) (*User, error) {
+func NewFromEmail(email, password, team string) (*User, error) {
 	// TODO: validate email
 	return &User{
 		Email:    email,
 		Password: password,
+		Team:     team,
 	}, nil
 }
 
