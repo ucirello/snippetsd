@@ -10,7 +10,7 @@ export function loadSnippets () {
     })
     .then((snippets) => {
       dispatch({
-        type: 'INITIAL_LOAD',
+        type: 'snippets/SNIPPETS_LOADED',
         snippets: snippets
       })
     })

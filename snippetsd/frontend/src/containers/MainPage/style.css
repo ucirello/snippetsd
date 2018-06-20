@@ -1,7 +1,5 @@
 .snippet-card {
-	width: 32%;
 	margin-right: 10px;
-	display: inline-block;
 	vertical-align: top;
 	box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
 	transition: 0.3s;
@@ -17,4 +15,8 @@
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+.user-snippet {
+	margin-bottom: 10px;
 }

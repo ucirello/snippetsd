@@ -23,14 +23,12 @@ const App = () => (
     <Navbar>
       <Navbar.Header>
         <Navbar.Brand>
-          <Link to='/'>Snippets</Link>
+          <Link to='/'>Weekly snippets</Link>
         </Navbar.Brand>
       </Navbar.Header>
       <Nav>
         <NavItem componentClass={Link} eventKey={1}
-          href='/submit' to='/submit'>write</NavItem>
-        <NavItem componentClass={Link} eventKey={2}
-          href='/submit' to='/submit'>my past snippets</NavItem>
+          href='/submit' to='/submit'>my snippets</NavItem>
       </Nav>
     </Navbar>
 

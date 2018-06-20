@@ -16,9 +16,10 @@ export const SNIPPETS_LOADED = 'snippets/SNIPPETS_LOADED'
 
 const initialState = {
   snippets: [
-    {name: 'James T. Kirk', email: 'kirk@domain', snippets: ['snippet 1', 'snippet 2', 'snippet 3', 'snippet 4']},
-    {name: 'Spock son of Sarek', email: 'spock@domain', snippets: ['snippet 1', 'snippet 2', 'snippet 3', 'snippet 4']},
-    {name: 'Leonard McCoy', email: 'mccoy@domain', snippets: ['snippet 1', 'snippet 2', 'snippet 3', 'snippet 4']}
+    {week_start: '2018-06-18T00:00:00Z', user: {team: 'command', email: 'kirk@domain'}, contents: 'content'},
+    {week_start: '2018-06-18T00:00:00Z', user: {team: 'command', email: 'jlp@domain'}, contents: 'content'},
+    {week_start: '2018-06-18T00:00:00Z', user: {team: 'science', email: 'spock@domain'}, contents: 'content'},
+    {week_start: '2018-06-18T00:00:00Z', user: {team: 'medical', email: 'mccoy@domain'}, contents: ''}
   ]
 }
 

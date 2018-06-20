@@ -17,6 +17,8 @@ import { bindActionCreators } from 'redux'
 import { connect } from 'react-redux'
 import { loadSnippets } from './actions'
 import { Col, Grid, PageHeader, Panel, Row } from 'react-bootstrap'
+import groupBy from 'lodash/groupBy'
+import moment from 'moment'
 
 import './style.css'
 
@@ -25,25 +27,47 @@ export class Home extends React.PureComponent {
     this.props.loadSnippets()
   }
   render () {
+    var snippets = groupBy(this.props.snippets, function (v) {
+      return v.week_start
+    })
+
+    let groupedSnippets = {}
+    for (let i in snippets) {
+      groupedSnippets[i] = groupBy(snippets[i], function (v) {
+        return v.user.team
+      })
+    }
+
+    console.log(groupedSnippets)
+
     return (
       <Grid>
-        <Row>
-          <Col>
-            <PageHeader> Snippets for the week of Jun 3~10: </PageHeader>
-            {
-              this.props.snippets.map((u) => (
-                <Panel key={u.email} className='snippet-card'>
-                  <strong>{u.name}</strong>
-                  <ul>
-                    {u.snippets.map((s) => (
-                      <li key={u.email + s}>{s}</li>
-                    ))}
-                  </ul>
-                </Panel>
+
+        {
+              Object.entries(groupedSnippets).map((week) => (
+                <Row key={week[0]}>
+                  <Col>
+                    <PageHeader> Snippets for the week starting {moment(week[0]).format('MMMM Do YYYY')}: </PageHeader>
+                    {
+                      Object.entries(week[1]).map((team) => (
+                        <Panel key={team[0]} className='snippet-card'>
+                          <strong>{team[0]}</strong>
+                          {team[1].map(
+                            (snippet) => (
+                              <div key={snippet.user.email} className='user-snippet'>
+                                <span>{snippet.user.email}</span>
+                                <div> {snippet.contents || 'no snippet'} </div>
+                              </div>
+                            )
+                          )}
+                        </Panel>
+                      ))
+                    }
+                  </Col>
+                </Row>
               ))
             }
-          </Col>
-        </Row>
+
       </Grid>
     )
   }
