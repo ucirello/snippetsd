@@ -13,7 +13,7 @@ func (c *commands) addUser() cli.Command {
 		Name:  "add",
 		Usage: "add a user",
 		Action: func(ctx *cli.Context) error {
-			u, err := user.NewFromEmail(ctx.Args().First())
+			u, err := user.NewFromEmail(ctx.Args().Get(0), ctx.Args().Get(1))
 			if err != nil {
 				return errors.E(ctx, err, "cannot create user from email")
 			}

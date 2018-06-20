@@ -15,6 +15,8 @@
 package snippet
 
 import (
+	"time"
+
 	"cirello.io/snippetsd/pkg/errors"
 	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
@@ -118,8 +120,7 @@ func (b *Repository) All(opts ...RepositoryOption) ([]*Snippet, error) {
 // Current returns the current week snippets.
 func (b *Repository) Current(opts ...RepositoryOption) ([]*Snippet, error) {
 	var snippets []*Snippet
-	// TODO: convert 7 to variable representing the number of days
-	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE created_at > 7")
+	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE created_at >= $1", 7*24*time.Hour)
 	if err := applyRepositoryOptions(b, &snippets, opts); err != nil {
 		return snippets, errors.E(err)
 	}

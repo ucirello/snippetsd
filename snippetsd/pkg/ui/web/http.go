@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"cirello.io/snippetsd/pkg/models/snippet"
+	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -30,8 +31,26 @@ func (s *Server) registerRoutes() {
 	s.mux.HandleFunc("/", http.NotFound)
 }
 
+func (s *Server) unauthorized(w http.ResponseWriter) {
+	w.Header().Add("WWW-Authenticate", `Basic realm="snippetsd"`)
+	w.WriteHeader(http.StatusUnauthorized)
+}
+
 // ServeHTTP process HTTP requests.
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	email, password, ok := r.BasicAuth()
+	if !ok {
+		s.unauthorized(w)
+		return
+	}
+
+	u, err := user.Authenticate(s.db, email, password)
+	if err != nil {
+		s.unauthorized(w)
+		return
+	}
+
+	r = r.WithContext(user.WithContext(r.Context(), u))
 	s.mux.ServeHTTP(w, r)
 }
 

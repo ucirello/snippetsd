@@ -35,6 +35,7 @@ func (b *Repository) Bootstrap() error {
 		`create table if not exists users (
 			id integer primary key autoincrement,
 			email varchar(255),
+			password varchar(255),
 			constraint users_email_unique unique (email)
 		);
 		`,
@@ -67,14 +68,18 @@ func (b *Repository) GetByEmail(email string) (*User, error) {
 
 // Insert a user.
 func (b *Repository) Insert(user *User) (*User, error) {
+	if err := user.encryptPassword(); err != nil {
+		return nil, errors.E(err, "cannot encrypt password")
+	}
 	_, err := b.db.NamedExec(`
 		INSERT INTO users
-		(email)
-		VALUES (:email)
+		(email, password)
+		VALUES (:email, :password)
 	`, user)
 	if err != nil {
 		return nil, errors.E(err)
 	}
+	user.Password = "" // avoid leaking
 
 	err = b.db.Get(user, `
 		SELECT
@@ -90,14 +95,14 @@ func (b *Repository) Insert(user *User) (*User, error) {
 	return user, errors.E(err)
 }
 
-// Update a user.
-func (b *Repository) Update(user *User) error {
-	_, err := b.db.NamedExec(`
-		UPDATE Users
-		SET
-			email = :email
-		WHERE
-			id = :id
-	`, user)
-	return errors.E(err)
-}
+// // Update a user.
+// func (b *Repository) Update(user *User) error {
+// 	_, err := b.db.NamedExec(`
+// 		UPDATE Users
+// 		SET
+// 			email = :email
+// 		WHERE
+// 			id = :id
+// 	`, user)
+// 	return errors.E(err)
+// }
