@@ -2,5 +2,5 @@ workdir: $GOPATH/src/cirello.io/snippetsd
 observe: *.go
 ignore: /vendor
 build-backed: go build -i -o snippetsd ./cmd/snippetsd
-backend:      ./snippetsd http -bind=:8081
+backend:      ./snippetsd http
 ui:           restart=tmp cd frontend; npm run start

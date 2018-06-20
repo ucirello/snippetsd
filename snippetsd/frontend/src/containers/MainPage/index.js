@@ -20,27 +20,34 @@ import { Col, Grid, PageHeader, Panel, Row } from 'react-bootstrap'
 
 import './style.css'
 
-const Home = props => (
-  <Grid>
-    <Row>
-      <Col>
-        <PageHeader> Snippets for the week of Jun 3~10: </PageHeader>
-        {
-          props.snippets.map((u) => (
-            <Panel className='snippet-card'>
-              <strong>{u.name}</strong>
-              <ul>
-                {u.snippets.map((s) => (
-                  <li>{s}</li>
-                ))}
-              </ul>
-            </Panel>
-          ))
-        }
-      </Col>
-    </Row>
-  </Grid>
-)
+export class Home extends React.PureComponent {
+  componentDidMount () {
+    this.props.loadSnippets()
+  }
+  render () {
+    return (
+      <Grid>
+        <Row>
+          <Col>
+            <PageHeader> Snippets for the week of Jun 3~10: </PageHeader>
+            {
+              this.props.snippets.map((u) => (
+                <Panel key={u.email} className='snippet-card'>
+                  <strong>{u.name}</strong>
+                  <ul>
+                    {u.snippets.map((s) => (
+                      <li key={u.email + s}>{s}</li>
+                    ))}
+                  </ul>
+                </Panel>
+              ))
+            }
+          </Col>
+        </Row>
+      </Grid>
+    )
+  }
+}
 
 const s2p = state => ({ snippets: state.snippets.snippets })
 const d2p = dispatch => bindActionCreators({ loadSnippets }, dispatch)
