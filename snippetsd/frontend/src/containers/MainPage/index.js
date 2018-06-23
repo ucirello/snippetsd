@@ -42,37 +42,35 @@ export class Home extends React.PureComponent {
 
     return (
       <Grid>
-
         {
-              Object.entries(groupedSnippets).map((week) => (
-                <Row key={week[0]}>
-                  <Col>
-                    <PageHeader> Snippets for the week starting {moment(week[0]).format('MMMM Do YYYY')}: </PageHeader>
-                    {
-                      Object.entries(week[1]).map((team) => (
-                        <Panel key={team[0]} className='snippet-card'>
-                          <strong>{team[0]}</strong>
-                          {team[1].map(
-                            (snippet) => (
-                              <div key={snippet.user.email} className='user-snippet'>
-                                <span>{snippet.user.email}</span>
-                                <div> {snippet.contents || 'no snippet'} </div>
-                              </div>
-                            )
-                          )}
-                        </Panel>
-                      ))
-                    }
-                  </Col>
-                </Row>
-              ))
-            }
-
+            Object.entries(groupedSnippets).map((week) => (
+              <Row key={week[0]}>
+                <Col>
+                  <PageHeader> Snippets for the week starting {moment(week[0]).format('MMMM Do YYYY')}: </PageHeader>
+                  {
+                    Object.entries(week[1]).map((team) => (
+                      <Panel key={team[0]} className='snippet-card'>
+                        <strong>{team[0]}</strong>
+                        {team[1].map(
+                          (snippet) => (
+                            <div key={snippet.user.email} className='user-snippet'>
+                              <span>{snippet.user.email}</span>
+                              <div> {snippet.contents || 'no snippet'} </div>
+                            </div>
+                          )
+                        )}
+                      </Panel>
+                    ))
+                  }
+                </Col>
+              </Row>
+            ))
+          }
       </Grid>
     )
   }
 }
 
-const s2p = state => ({ snippets: state.snippets.snippets })
+const s2p = state => ({ snippets: state.snippets.allSnippets })
 const d2p = dispatch => bindActionCreators({ loadSnippets }, dispatch)
 export default connect(s2p, d2p)(Home)

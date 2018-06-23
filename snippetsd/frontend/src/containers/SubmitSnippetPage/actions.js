@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function loadSnippets () {
+export function loadSnippetsByUser (user) {
   return (dispatch) => {
-    fetch('http://localhost:5100/state', {
+    fetch('http://localhost:5100/snippetsByUser/' + user, {
       credentials: 'include'
     })
     .then(res => res.json())
@@ -23,7 +23,7 @@ export function loadSnippets () {
     })
     .then((snippets) => {
       dispatch({
-        type: 'snippets/ALL_SNIPPETS_LOADED',
+        type: 'snippets/USER_SNIPPETS_LOADED',
         snippets: snippets
       })
     })
