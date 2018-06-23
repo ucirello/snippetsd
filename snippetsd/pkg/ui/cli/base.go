@@ -7,8 +7,7 @@ import (
 	"strings"
 
 	"cirello.io/snippetsd/pkg/errors"
-	"cirello.io/snippetsd/pkg/models/snippet"
-	"cirello.io/snippetsd/pkg/models/user"
+	"cirello.io/snippetsd/pkg/infra/repositories"
 	"github.com/jmoiron/sqlx"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -18,10 +17,11 @@ type commands struct {
 }
 
 func (c *commands) bootstrap(ctx *cli.Context) error {
-	if err := snippet.NewRepository(c.db).Bootstrap(); err != nil {
+	if err := repositories.Snippets(c.db).Bootstrap(); err != nil {
 		return errors.E(ctx, err, "failed when bootstrapping snippets")
 	}
-	if err := user.NewRepository(c.db).Bootstrap(); err != nil {
+
+	if err := repositories.Users(c.db).Bootstrap(); err != nil {
 		return errors.E(ctx, err, "failed when bootstrapping users")
 	}
 

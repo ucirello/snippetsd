@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"cirello.io/snippetsd/pkg/models/snippet"
+	"cirello.io/snippetsd/pkg/infra/repositories"
 	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
@@ -48,8 +48,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err := user.Authenticate(s.db, email, password)
+	u, err := repositories.Users(s.db).GetByEmail(email)
 	if err != nil {
+		s.unauthorized(w)
+		return
+	}
+
+	if err := user.Authenticate(u, email, password); err != nil {
 		s.unauthorized(w)
 		return
 	}
@@ -59,7 +64,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) state(w http.ResponseWriter, r *http.Request) {
-	snippets, err := snippet.LoadAll(s.db)
+	snippets, err := repositories.Snippets(s.db).All()
 	if err != nil {
 		log.Println("cannot load all snippets:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

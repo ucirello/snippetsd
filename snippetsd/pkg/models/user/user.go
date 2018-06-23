@@ -18,7 +18,6 @@ import (
 	"fmt"
 
 	"cirello.io/snippetsd/pkg/errors"
-	"github.com/jmoiron/sqlx"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -34,25 +33,17 @@ func (u *User) String() string {
 	return fmt.Sprintf("%v", u.Email)
 }
 
-func (u *User) encryptPassword() error {
+// EncryptPassword takes the current value of the password, and encrypts it
+// using bcrypt. If it is already encrypted, it will encrypt twice.
+func (u *User) EncryptPassword() error {
+	// TODO: if possible, prevent double encryption
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.MinCost)
 	if err != nil {
 		return errors.E(err, "cannot encrypt password")
 	}
 	u.Password = string(hash)
 	return nil
-}
-
-func (u *User) checkPassword(plainPassword string) bool {
-	byteHash := []byte(u.Password)
-	err := bcrypt.CompareHashAndPassword(byteHash, []byte(plainPassword))
-	u.Password = ""
-	return err == nil
-}
-
-// Add inserts a user into the repository.
-func Add(db *sqlx.DB, u *User) (*User, error) {
-	return NewRepository(db).Insert(u)
 }
 
 // NewFromEmail creates a user from a given email.
@@ -65,17 +56,19 @@ func NewFromEmail(email, password, team string) (*User, error) {
 	}, nil
 }
 
-// Authenticate finds a user and check their password.
-func Authenticate(db *sqlx.DB, email, password string) (*User, error) {
-	u, err := NewRepository(db).GetByEmail(email)
-	if err != nil {
-		return nil, errors.E(err, "cannot find user")
-	}
-	if !u.checkPassword(password) {
-		return nil, errors.E("invalid credentials")
-	}
+func (u *User) checkPassword(plainPassword string) bool {
+	byteHash := []byte(u.Password)
+	err := bcrypt.CompareHashAndPassword(byteHash, []byte(plainPassword))
+	u.Password = ""
+	return err == nil
+}
 
-	return u, nil
+// Authenticate finds a user and check their password.
+func Authenticate(u *User, email, password string) error {
+	if !u.checkPassword(password) {
+		return errors.E("invalid credentials")
+	}
+	return nil
 }
 
 type userCtxKeyType struct{}

@@ -18,7 +18,6 @@ import (
 	"time"
 
 	"cirello.io/snippetsd/pkg/models/user"
-	"github.com/jmoiron/sqlx"
 )
 
 // Snippet aggregates all the information of a snippet.
@@ -34,10 +33,4 @@ type Snippet struct {
 // HasContent checks if the snippet has any content.
 func (s *Snippet) HasContent() bool {
 	return len(s.Contents) > 0
-}
-
-// LoadAll load all snippets for the current week.
-func LoadAll(db *sqlx.DB) ([]*Snippet, error) {
-	repo := NewRepository(db)
-	return repo.All(WithUser())
 }

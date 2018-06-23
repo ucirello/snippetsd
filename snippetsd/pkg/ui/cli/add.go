@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"cirello.io/snippetsd/pkg/errors"
+	"cirello.io/snippetsd/pkg/infra/repositories"
 	"cirello.io/snippetsd/pkg/models/user"
 	"gopkg.in/urfave/cli.v1"
 )
@@ -17,7 +18,8 @@ func (c *commands) addUser() cli.Command {
 			if err != nil {
 				return errors.E(ctx, err, "cannot create user from email")
 			}
-			if _, err := user.Add(c.db, u); err != nil {
+
+			if _, err := repositories.Users(c.db).Insert(u); err != nil {
 				return errors.E(ctx, err, "cannot store the new user")
 			}
 
