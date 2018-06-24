@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"cirello.io/snippetsd/pkg/infra/repositories"
+	"cirello.io/snippetsd/pkg/models/snippet"
 	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
@@ -27,6 +28,7 @@ func New(db *sqlx.DB) *Server {
 }
 
 func (s *Server) registerRoutes() {
+	s.mux.HandleFunc("/storeSnippet", s.storeSnippet)
 	s.mux.HandleFunc("/snippetsByUser", s.snippetsByUser)
 	s.mux.HandleFunc("/state", s.state)
 	s.mux.HandleFunc("/", http.NotFound)
@@ -97,6 +99,38 @@ func (s *Server) snippetsByUser(w http.ResponseWriter, r *http.Request) {
 	enc.SetIndent("", "    ")
 	if err := enc.Encode(snippets); err != nil {
 		log.Println("cannot marshal snippets:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) storeSnippet(w http.ResponseWriter, r *http.Request) {
+	user := user.WhoAmI(r.Context())
+
+	var req struct {
+		Contents string
+	}
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		log.Println("cannot parse snippet storage request:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	snippet := snippet.New(user, req.Contents)
+	savedSnippet, err := repositories.Snippets(s.db).Save(snippet)
+	if err != nil {
+		log.Println("cannot save user's saved snippet:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	if err := enc.Encode(savedSnippet); err != nil {
+		log.Println("cannot marshal saved snippet:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

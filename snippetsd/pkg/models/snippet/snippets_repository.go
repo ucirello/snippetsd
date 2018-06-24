@@ -22,6 +22,5 @@ type Repository interface {
 	All() ([]*Snippet, error)
 	GetByUser(*user.User) ([]*Snippet, error)
 	Current() ([]*Snippet, error)
-	Insert(snippet *Snippet) (*Snippet, error)
-	Update(snippet *Snippet) error
+	Save(snippet *Snippet) (*Snippet, error)
 }

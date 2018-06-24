@@ -47,6 +47,7 @@ func (b *Repository) Bootstrap() error {
 		`,
 		`create index if not exists snippets_user_id on snippets (user_id)`,
 		`create index if not exists snippets_week_start on snippets (week_start)`,
+		`create unique index if not exists snippets_user_id_week_start on snippets (user_id, week_start)`,
 	}
 
 	for _, cmd := range cmds {
@@ -62,7 +63,7 @@ func (b *Repository) Bootstrap() error {
 func (b *Repository) loadUsers(snippets *[]*snippet.Snippet) error {
 	repo := users.NewRepository(b.db)
 	for i, s := range *snippets {
-		u, err := repo.GetByID(s.ID)
+		u, err := repo.GetByID(s.UserID)
 		if err != nil {
 			return errors.E(err, "cannot load snippets user")
 		}
@@ -75,7 +76,7 @@ func (b *Repository) loadUsers(snippets *[]*snippet.Snippet) error {
 // All returns all known snippets.
 func (b *Repository) All() ([]*snippet.Snippet, error) {
 	var snippets []*snippet.Snippet
-	err := b.db.Select(&snippets, "SELECT * FROM snippets")
+	err := b.db.Select(&snippets, "SELECT * FROM snippets ORDER BY week_start DESC")
 	if err != nil {
 		return snippets, errors.E(err, "cannot load snippets")
 	}
@@ -88,7 +89,7 @@ func (b *Repository) All() ([]*snippet.Snippet, error) {
 // GetByUser returns a user's snippets.
 func (b *Repository) GetByUser(user *user.User) ([]*snippet.Snippet, error) {
 	var snippets []*snippet.Snippet
-	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE user_id = $1", user.ID)
+	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE user_id = $1 ORDER BY week_start DESC", user.ID)
 	if err != nil {
 		return snippets, errors.E(err, "cannot load snippets")
 	}
@@ -113,11 +114,10 @@ func (b *Repository) Current() ([]*snippet.Snippet, error) {
 	return snippets, nil
 }
 
-// Insert one snippet entry.
-func (b *Repository) Insert(snippet *snippet.Snippet) (*snippet.Snippet, error) {
+// Save one snippet entry.
+func (b *Repository) Save(snippet *snippet.Snippet) (*snippet.Snippet, error) {
 	_, err := b.db.NamedExec(`
-		INSERT INTO snippets
-		(user_id, week_start, contents)
+		INSERT OR REPLACE INTO snippets (user_id, week_start, contents)
 		VALUES (:user_id, :week_start, :contents)
 	`, snippet)
 	if err != nil {
@@ -137,22 +137,4 @@ func (b *Repository) Insert(snippet *snippet.Snippet) (*snippet.Snippet, error) 
 	}
 
 	return snippet, nil
-}
-
-// Update one snippet.
-func (b *Repository) Update(snippet *snippet.Snippet) error {
-	_, err := b.db.NamedExec(`
-		UPDATE snippets
-		SET
-			user_id = :user_id,
-			week_start = :week_start,
-			contents = :contents
-		WHERE
-			id = :id
-	`, snippet)
-	if err != nil {
-		return errors.E(err)
-	}
-
-	return nil
 }

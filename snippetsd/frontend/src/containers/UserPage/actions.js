@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export function loadSnippetsByUser (user) {
+// import { push } from 'react-router-redux'
+
+export function loadSnippetsByUser () {
   return (dispatch) => {
     fetch('http://localhost:5100/snippetsByUser', {
       credentials: 'include'
@@ -26,6 +28,23 @@ export function loadSnippetsByUser (user) {
         type: 'snippets/USER_SNIPPETS_LOADED',
         snippets: snippets
       })
+    })
+  }
+}
+
+export function saveSnippet (contents) {
+  return (dispatch) => {
+    fetch('http://localhost:5100/storeSnippet', {
+      credentials: 'include',
+      method: 'POST',
+      body: JSON.stringify({contents})
+    })
+    .then(res => res.json())
+    .catch((e) => {
+      console.log('cannot store snippet:', e)
+    })
+    .then(() => {
+      loadSnippetsByUser()(dispatch)
     })
   }
 }

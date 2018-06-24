@@ -9,6 +9,11 @@
 	text-align: center;
 }
 
+.user-snippet-container {
+	height: 270px;
+	overflow: hidden;
+}
+
 .user-past-snippet{
 	margin-left: 30px;
 	margin-bottom: 10px;

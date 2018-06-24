@@ -23,14 +23,27 @@ import (
 // Snippet aggregates all the information of a snippet.
 type Snippet struct {
 	ID        int64      `db:"id" json:"id"`
-	UserID    string     `db:"user_id" json:"user_id"`
+	UserID    int64      `db:"user_id" json:"user_id"`
 	WeekStart *time.Time `db:"week_start" json:"week_start"`
 
 	Contents string     `db:"contents" json:"contents"`
 	User     *user.User `db:"-" json:"user"`
 }
 
-// HasContent checks if the snippet has any content.
-func (s *Snippet) HasContent() bool {
-	return len(s.Contents) > 0
+// New creates a new Snippet and establishes its minimum set of data.
+func New(u *user.User, contents string) *Snippet {
+	now := time.Now()
+	t := now.AddDate(0, 0, -int(now.Weekday())+1)
+	startOfWeek := time.Date(
+		t.Year(), t.Month(), t.Day(),
+		0, 0, 0, 0,
+		time.UTC,
+	)
+
+	return &Snippet{
+		UserID:    u.ID,
+		WeekStart: &startOfWeek,
+		Contents:  contents,
+		User:      u,
+	}
 }

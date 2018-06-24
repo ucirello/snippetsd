@@ -24,32 +24,55 @@ import {
   Row,
   FormControl
 } from 'react-bootstrap'
-import { loadSnippetsByUser } from './actions'
+import { loadSnippetsByUser, saveSnippet } from './actions'
 import groupBy from 'lodash/groupBy'
 import moment from 'moment'
 
 import './style.css'
 
 class SubmitSnippetPage extends React.Component {
+  constructor (props) {
+    super(props)
+
+    this.setContent = this.setContent.bind(this)
+    this.submit = this.submit.bind(this)
+
+    this.state = {
+      content: ''
+    }
+  }
+
   componentDidMount () {
     this.props.loadSnippetsByUser()
+  }
+
+  setContent (e) {
+    e.preventDefault()
+    var content = e.target.value
+    this.setState({ content })
+  }
+  submit (e) {
+    e.preventDefault()
+    this.props.saveSnippet(this.state.content)
   }
 
   render () {
     var snippets = groupBy(this.props.snippets, function (v) {
       return v.week_start
     })
-    console.log(snippets)
+
     return (
       <Grid>
         <Row>
           <Col>
-            <PageHeader> What did you do past week? </PageHeader>
+            <div className='user-snippet-container'>
+              <PageHeader> What did you do past week? </PageHeader>
 
-            <Form>
-              <FormControl componentClass='textarea' className='user-snippet-content' />
-              <div className='user-snippet-submit'><Button>submit</Button></div>
-            </Form>
+              <Form onSubmit={this.submit}>
+                <FormControl componentClass='textarea' className='user-snippet-content' onChange={this.setContent} />
+                <div className='user-snippet-submit'><Button type='submit'>submit</Button></div>
+              </Form>
+            </div>
           </Col>
         </Row>
         <Row>
@@ -72,6 +95,7 @@ class SubmitSnippetPage extends React.Component {
 
 const s2p = state => ({ snippets: state.snippets.snippets })
 const d2p = dispatch => bindActionCreators({
-  loadSnippetsByUser
+  loadSnippetsByUser,
+  saveSnippet
 }, dispatch)
 export default connect(s2p, d2p)(SubmitSnippetPage)
