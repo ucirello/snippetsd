@@ -14,7 +14,7 @@
 
 export function loadSnippetsByUser (user) {
   return (dispatch) => {
-    fetch('http://localhost:5100/snippetsByUser/' + user, {
+    fetch('http://localhost:5100/snippetsByUser', {
       credentials: 'include'
     })
     .then(res => res.json())

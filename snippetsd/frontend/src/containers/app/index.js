@@ -15,26 +15,26 @@
 import React from 'react'
 import { Route, Link } from 'react-router-dom'
 import { Nav, NavItem, Navbar } from 'react-bootstrap'
-import MainPage from '../MainPage'
-import SubmitSnippetPage from '../SubmitSnippetPage'
+import WeekPage from '../WeekPage'
+import UserPage from '../UserPage'
 
 const App = () => (
   <div>
     <Navbar>
       <Navbar.Header>
         <Navbar.Brand>
-          <Link to='/'>Weekly snippets</Link>
+          <Link to='/view'>Weekly snippets</Link>
         </Navbar.Brand>
       </Navbar.Header>
       <Nav>
         <NavItem componentClass={Link} eventKey={1}
-          href='/submit' to='/submit'>my snippets</NavItem>
+          href='/' to='/'>my snippets</NavItem>
       </Nav>
     </Navbar>
 
     <main>
-      <Route exact path='/' component={MainPage} />
-      <Route exact path='/submit' component={SubmitSnippetPage} />
+      <Route exact path='/view' component={WeekPage} />
+      <Route exact path='/' component={UserPage} />
     </main>
   </div>
 )

@@ -23,7 +23,7 @@ export function loadSnippets () {
     })
     .then((snippets) => {
       dispatch({
-        type: 'snippets/ALL_SNIPPETS_LOADED',
+        type: 'snippets/WEEK_SNIPPETS_LOADED',
         snippets: snippets
       })
     })

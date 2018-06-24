@@ -19,6 +19,7 @@ import (
 	"cirello.io/snippetsd/pkg/errors"
 	"cirello.io/snippetsd/pkg/infra/repositories/internal/sqlite3/users"
 	"cirello.io/snippetsd/pkg/models/snippet"
+	"cirello.io/snippetsd/pkg/models/user"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -75,6 +76,19 @@ func (b *Repository) loadUsers(snippets *[]*snippet.Snippet) error {
 func (b *Repository) All() ([]*snippet.Snippet, error) {
 	var snippets []*snippet.Snippet
 	err := b.db.Select(&snippets, "SELECT * FROM snippets")
+	if err != nil {
+		return snippets, errors.E(err, "cannot load snippets")
+	}
+	if err := b.loadUsers(&snippets); err != nil {
+		return snippets, errors.E(err, "cannot load users information")
+	}
+	return snippets, nil
+}
+
+// GetByUser returns a user's snippets.
+func (b *Repository) GetByUser(user *user.User) ([]*snippet.Snippet, error) {
+	var snippets []*snippet.Snippet
+	err := b.db.Select(&snippets, "SELECT * FROM snippets WHERE user_id = $1", user.ID)
 	if err != nil {
 		return snippets, errors.E(err, "cannot load snippets")
 	}

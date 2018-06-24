@@ -27,6 +27,7 @@ func New(db *sqlx.DB) *Server {
 }
 
 func (s *Server) registerRoutes() {
+	s.mux.HandleFunc("/snippetsByUser", s.snippetsByUser)
 	s.mux.HandleFunc("/state", s.state)
 	s.mux.HandleFunc("/", http.NotFound)
 }
@@ -67,6 +68,26 @@ func (s *Server) state(w http.ResponseWriter, r *http.Request) {
 	snippets, err := repositories.Snippets(s.db).All()
 	if err != nil {
 		log.Println("cannot load all snippets:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+
+	enc := json.NewEncoder(w)
+	enc.SetIndent("", "    ")
+	if err := enc.Encode(snippets); err != nil {
+		log.Println("cannot marshal snippets:", err)
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) snippetsByUser(w http.ResponseWriter, r *http.Request) {
+	user := user.WhoAmI(r.Context())
+	snippets, err := repositories.Snippets(s.db).GetByUser(user)
+	if err != nil {
+		log.Println("cannot load user's snippets:", err)
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

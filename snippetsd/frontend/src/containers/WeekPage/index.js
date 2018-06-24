@@ -22,7 +22,7 @@ import moment from 'moment'
 
 import './style.css'
 
-export class Home extends React.PureComponent {
+export class WeekPage extends React.PureComponent {
   componentDidMount () {
     this.props.loadSnippets()
   }
@@ -71,6 +71,6 @@ export class Home extends React.PureComponent {
   }
 }
 
-const s2p = state => ({ snippets: state.snippets.allSnippets })
+const s2p = state => ({ snippets: state.snippets.weekSnippets })
 const d2p = dispatch => bindActionCreators({ loadSnippets }, dispatch)
-export default connect(s2p, d2p)(Home)
+export default connect(s2p, d2p)(WeekPage)
