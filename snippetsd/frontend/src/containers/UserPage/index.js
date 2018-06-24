@@ -62,7 +62,7 @@ class SubmitSnippetPage extends React.Component {
     })
 
     return (
-      <Grid>
+      <Grid className='user-snippet-grid'>
         <Row>
           <Col>
             <div className='user-snippet-container'>
