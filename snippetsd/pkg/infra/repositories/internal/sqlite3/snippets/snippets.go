@@ -117,23 +117,13 @@ func (b *Repository) Current() ([]*snippet.Snippet, error) {
 // Save one snippet entry.
 func (b *Repository) Save(snippet *snippet.Snippet) (*snippet.Snippet, error) {
 	_, err := b.db.NamedExec(`
-		INSERT OR REPLACE INTO snippets (user_id, week_start, contents)
+		INSERT INTO snippets (user_id, week_start, contents)
 		VALUES (:user_id, :week_start, :contents)
+		ON CONFLICT(user_id, week_start)
+		DO UPDATE SET contents = :contents
 	`, snippet)
 	if err != nil {
-		return nil, errors.E(err)
-	}
-
-	err = b.db.Get(snippet, `
-		SELECT
-			*
-		FROM
-			snippets
-		WHERE
-			id = last_insert_rowid()
-	`)
-	if err != nil {
-		return nil, errors.E(err)
+		return nil, errors.E(err, "upsert operation failed")
 	}
 
 	return snippet, nil
