@@ -1,6 +1,6 @@
 workdir: $GOPATH/src/cirello.io/snippetsd
 observe: *.go
 ignore: /vendor
-build-backend: go build --tags "libsqlite3 darwin" -i -o snippetsd ./cmd/snippetsd
-backend:       ./snippetsd http
+build-backend: go install -tags "libsqlite3 darwin" ./cmd/snippetsd
+backend:       $GOPATH/bin/snippetsd http
 ui:            restart=tmp cd frontend; npm run start
